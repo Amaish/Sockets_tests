@@ -1,0 +1,33 @@
+<html >
+    <head>
+        {% if title %}
+        <title>{{ title }} - Publish Subscribe platform</title>
+        {% else %}
+        <title>Welcome to Publish Subscribe platform!</title>
+        {% endif %}
+    </head>
+    <body style="background-image: url('static/clouds.jpg')">
+        <div style="background-color: rgb(135, 203, 223);">Pub_Sub: 
+            <a href="/index">Home</a>
+            <a href="/Subscribe">Subscribe</a>
+            <a href="/Publish">Publish</a><br>
+        <div>
+            {{connect_message}}
+        </div>
+        </div>
+        <div style="background-color: rgb(141, 7, 7);">
+        
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+           <span style="color: rgb(0, 255, 179);">[{{ message }}]</span>
+            {% endfor %}
+        </ul>
+    
+        {% endif %}
+        {% endwith %}
+    </div>
+        {% block content %}{% endblock %}
+    </body>
+</html>
