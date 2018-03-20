@@ -139,6 +139,8 @@ class chat_class(config):
             server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server_socket.bind(("0.0.0.0", PORT))
             server_socket.listen(10)
+            conn, addr = server_socket.accept()
+            name = conn.recv(1024)
         
             # Add server socket to the list of readable connections
             CONNECTION_LIST.append(server_socket)
@@ -155,7 +157,13 @@ class chat_class(config):
                         # Handle the case in which there is a new connection recieved through server_socket
                         sockfd, addr = server_socket.accept()
                         CONNECTION_LIST.append(sockfd)
-                        print "Client (%s, %s) connected" % addr
+                        print type(addr)
+                        client = list(addr)
+                        print client
+                        user= str(client[0])+"."+str(client[1])
+                        print "user is: "+user
+                        print name
+                        print name+" is connected as user " + user
                         
                         self.broadcast_data(sockfd, "[%s:%s] entered room\n" % addr)
                     

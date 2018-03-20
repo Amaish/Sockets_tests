@@ -1,19 +1,31 @@
 import socket, select, string, sys
-from forms import  chat_class
- 
+from forms import  chat_class, client
+
+
+
+name=raw_input("enter your name: \n")
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+host = socket.gethostbyname(socket.gethostname())
+port = int(sys.argv[1])
+s.connect((host, port))
+sender=client()
+sender.send_message(s,name)
+
+
 def prompt() :
-    sys.stdout.write('<You> ')
+    sys.stdout.write(name+":->")
     sys.stdout.flush()
  
 #main function
 if __name__ == "__main__":
      
-    if(len(sys.argv) < 3) :
-        print 'Usage : python telnet.py hostname port'
+    if(len(sys.argv) < 2) :
+        print 'Usage : python routes.py port'
         sys.exit()
      
-    host = sys.argv[1]
-    port = int(sys.argv[2])
+    host = socket.gethostbyname(socket.gethostname())
+    print host
+    port = int(sys.argv[1])
      
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(2)
