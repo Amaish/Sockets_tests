@@ -173,7 +173,7 @@ class chat_class(config):
                             new_ID=list(ID)
                             Disp_ID=str(new_ID[0])+"."+str(new_ID[1])
                             if data:
-                                self.broadcast_data(sock, "\n\n" users[Disp_ID] + ':-> ' + data)                
+                                self.broadcast_data(sock, "\n\n" +users[Disp_ID] + ':-> ' + data)                
                         
                         except:
                             self.broadcast_data(sock, "Client (%s, %s) is offline" % users[Disp_ID])
