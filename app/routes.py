@@ -1,20 +1,28 @@
 import socket, select, string, sys
-from forms import  chat_class, client
+from forms import  chat_class, client, server
 
 
-
-name=raw_input("enter your name: \n")
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = socket.gethostbyname(socket.gethostname())
 port = int(sys.argv[1])
-s.connect((host, port))
-sender=client()
-sender.send_message(s,name)
+server_socket= socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
-def prompt() :
-    sys.stdout.write(name+":->")
-    sys.stdout.flush()
+names=[]
+print len(names)
+name=""
+def prompt(host,s) :
+    if len(names)<1:
+        global name
+        name=raw_input("enter your name: ")
+        host = socket.gethostbyname(socket.gethostname())
+        sender=client()
+        sender.create_socket()
+        sender.connect_host(host,port,s)
+        sender.send_message(s,name)
+        names.append(name)
+        print names
+    else:
+        sys.stdout.write("\n"+name+":->")
+        sys.stdout.flush()
  
 #main function
 if __name__ == "__main__":
@@ -29,7 +37,7 @@ if __name__ == "__main__":
      
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(2)
-     
+    prompt(host,s) 
     # connect to remote host
     try :
         s.connect((host, port))
@@ -38,7 +46,7 @@ if __name__ == "__main__":
         sys.exit()
      
     print 'Connected to remote host. Start sending messages'
-    prompt()
+    prompt(host,s)
      
     while 1:
         socket_list = [sys.stdin, s]
@@ -56,10 +64,10 @@ if __name__ == "__main__":
                 else :
                     #print data
                     sys.stdout.write(data)
-                    prompt()
+                    prompt(host,s)
              
             #user entered a message
             else :
                 msg = sys.stdin.readline()
                 s.send(msg)
-                prompt()
+                prompt(host,s)

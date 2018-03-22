@@ -10,8 +10,6 @@ class config:
         self.s = s
         self.CONNECTION_LIST=CONNECTION_LIST
 
-
-class client(config):
     def create_socket(self):  # Create a socket
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -35,12 +33,15 @@ class client(config):
         s.connect((remote_ip, port))
         print 'Socket Connected to ' + host + ' on ip ' + remote_ip
 
+
+class client(config):
+
     def send_message(self, s, message):  # Send some data
         self.s = s
         self.message = message
         try:
             # Set the whole string
-            s.sendall(message)
+            s.send(message)
         except socket.error:
             # Send failed
             print 'Send failed'
@@ -56,18 +57,11 @@ class client(config):
 
 
 class server(config):
-    def create_socket(self,s):  # Create a socket
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        except socket.error:
-            print 'Failed to create socket'
-            sys.exit()
-        print 'Socket Created'
-        return s
 
-    def bind_socket(self,s, host, port):
+    def bind_socket(self, host, port):
         self.host = host
         self.port = port
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             s.bind((host, port))
         except socket.error, msg:
@@ -86,18 +80,15 @@ class server(config):
         conn.send('Welcome to the server. Type something and hit enter\n') #send only takes string
         
         #infinite loop so that function do not terminate and thread do not end.
-        while True:
+        #while True:
             
-            #Receiving from client
-            data = conn.recv(1024)
-            reply = 'OK...' + data
-            if not data: 
-                break
-        
-            conn.sendall(reply)
-        
+        #Receiving from client
+        data = conn.recv(1024)
+        reply = 'OK...' + data    
+        conn.sendall(reply)
+    
         #came out of loop
-        conn.close()
+        return data
 
 
     def sckt_accept(self,s):
@@ -111,7 +102,8 @@ class server(config):
             start_new_thread(self.clientthread ,(conn,))
         
         s.close()
-
+        
+users = {}
 CONNECTION_LIST = []
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 class chat_class(config):
@@ -139,12 +131,11 @@ class chat_class(config):
             server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server_socket.bind(("0.0.0.0", PORT))
             server_socket.listen(10)
-            conn, addr = server_socket.accept()
-            name = conn.recv(1024)
+            live_server=server()
         
             # Add server socket to the list of readable connections
             CONNECTION_LIST.append(server_socket)
-        
+            print CONNECTION_LIST
             print "Chat server started on port " + str(PORT)
         
             while 1:
@@ -157,15 +148,19 @@ class chat_class(config):
                         # Handle the case in which there is a new connection recieved through server_socket
                         sockfd, addr = server_socket.accept()
                         CONNECTION_LIST.append(sockfd)
+                        name=live_server.clientthread(sockfd)
+                        print CONNECTION_LIST
                         print type(addr)
                         client = list(addr)
                         print client
                         user= str(client[0])+"."+str(client[1])
                         print "user is: "+user
                         print name
+                        users[user]=name
                         print name+" is connected as user " + user
+                        print users
                         
-                        self.broadcast_data(sockfd, "[%s:%s] entered room\n" % addr)
+                        self.broadcast_data(sockfd, "%s, is now online..." % name)
                     
                     #Some incoming message from a client
                     else:
@@ -174,12 +169,15 @@ class chat_class(config):
                             #In Windows, sometimes when a TCP program closes abruptly,
                             # a "Connection reset by peer" exception will be thrown
                             data = sock.recv(RECV_BUFFER)
+                            ID=sock.getpeername()
+                            new_ID=list(ID)
+                            Disp_ID=str(new_ID[0])+"."+str(new_ID[1])
                             if data:
-                                self.broadcast_data(sock, "\r" + '<' + str(sock.getpeername()) + '> ' + data)                
+                                self.broadcast_data(sock, "\n\n" users[Disp_ID] + ':-> ' + data)                
                         
                         except:
-                            self.broadcast_data(sock, "Client (%s, %s) is offline" % addr)
-                            print "Client (%s, %s) is offline" % addr
+                            self.broadcast_data(sock, "Client (%s, %s) is offline" % users[Disp_ID])
+                            print "Client (%s, %s) is offline" % users[Disp_ID]
                             sock.close()
                             CONNECTION_LIST.remove(sock)
                             continue
@@ -190,6 +188,6 @@ class chat_class(config):
 
 
 
-server = chat_class()
+server_class = chat_class()
 
-server.broadcast_server()
+server_class.broadcast_server()
